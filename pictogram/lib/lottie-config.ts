@@ -74,7 +74,7 @@ export async function loadPictogramAnimation(
   extraIconColorHex?: string
 ): Promise<LottieAnimationData> {
   try {
-    const response = await fetch(createAssetPath('/lottie/pictogram-2.json'))
+    const response = await fetch(createAssetPath('/lottie/pictogram-4.json'))
     const data = await response.json()
     
     // Convert hex color to normalized RGB if color is provided
