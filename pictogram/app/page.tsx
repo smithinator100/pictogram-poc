@@ -17,7 +17,7 @@ import { HandMetal } from "lucide-react"
 import Lottie from "lottie-react"
 import { useState, useEffect } from "react"
 import { loadPictogramAnimation, lottieProps, type LottieAnimationData } from "@/lib/lottie-config"
-import { createApiPath } from "@/lib/path-utils"
+import { createApiPath, createAssetPath } from "@/lib/path-utils"
 
 interface Pictogram {
   name: string
@@ -199,7 +199,7 @@ export default function HomePage() {
                       <SelectItem key={pictogram.filename} value={pictogram.filename}>
                         <div className="flex items-center gap-3">
                           <img
-                            src={`/images/${pictogram.filename}`}
+                            src={createAssetPath(`/images/${pictogram.filename}`)}
                             alt={pictogram.name.replace(/pictogram[-\s]*/gi, '').trim()}
                             className="w-5 h-5 object-contain"
                           />
@@ -294,7 +294,7 @@ export default function HomePage() {
                         <div className="flex items-center gap-3">
                           <div className="w-5 h-5 bg-black rounded flex items-center justify-center">
                             <img
-                              src={`/images/${extra.filename}`}
+                              src={createAssetPath(`/images/${extra.filename}`)}
                               alt={extra.name.replace(/extra[-\s]*/gi, '').trim()}
                               className="w-4 h-4 object-contain"
                             />
