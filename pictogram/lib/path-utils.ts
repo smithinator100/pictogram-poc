@@ -19,8 +19,16 @@ export function createPath(path: string): string {
 // Helper function for API calls
 export function createApiPath(endpoint: string): string {
   const path = createPath(`/api/${endpoint.replace(/^\//, '')}`)
-  // Ensure trailing slash for Next.js trailingSlash: true configuration
-  return path.endsWith('/') ? path : `${path}/`
+  
+  // In development, add trailing slash for Next.js trailingSlash: true configuration
+  // In production (GitHub Pages), use without trailing slash as files are pre-rendered
+  if (typeof window !== 'undefined' && window.location.hostname === 'smithinator100.github.io') {
+    // GitHub Pages static files don't have trailing slashes
+    return path
+  } else {
+    // Development server needs trailing slash
+    return path.endsWith('/') ? path : `${path}/`
+  }
 }
 
 // Helper function for static assets
