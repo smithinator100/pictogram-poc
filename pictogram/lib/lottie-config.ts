@@ -1,3 +1,5 @@
+import { createAssetPath } from './path-utils'
+
 export interface LottieAsset {
   id: string;
   w: number;
@@ -72,7 +74,7 @@ export async function loadPictogramAnimation(
   extraIconColorHex?: string
 ): Promise<LottieAnimationData> {
   try {
-    const response = await fetch('/lottie/pictogram-2.json')
+    const response = await fetch(createAssetPath('/lottie/pictogram-2.json'))
     const data = await response.json()
     
     // Convert hex color to normalized RGB if color is provided
@@ -80,11 +82,11 @@ export async function loadPictogramAnimation(
     
     // Process extra icon color modification if needed
     let processedExtraPath = extraFilename
-    let processedExtraU = '/images/'
+    let processedExtraU = createAssetPath('/images/')
     
     if (extraFilename && extraIconColorHex) {
       try {
-        const modifiedSvgDataUrl = await modifySvgColor(`/images/${extraFilename}`, extraIconColorHex)
+        const modifiedSvgDataUrl = await modifySvgColor(createAssetPath(`/images/${extraFilename}`), extraIconColorHex)
         processedExtraPath = modifiedSvgDataUrl
         processedExtraU = '' // Empty u for data URLs
       } catch (error) {
@@ -100,7 +102,7 @@ export async function loadPictogramAnimation(
         if (asset.p === 'img_3.png') {
           return {
             ...asset,
-            u: '/images/', // Update path for SVG
+            u: createAssetPath('/images/'), // Update path for SVG
             p: pictogramFilename // Replace with selected pictogram SVG file
           }
         }
@@ -113,7 +115,7 @@ export async function loadPictogramAnimation(
         }
         return {
           ...asset,
-          u: '/lottie/images/', // Update the path to the images
+          u: createAssetPath('/lottie/images/'), // Update the path to the images
         }
       }) || [],
       layers: data.layers?.map((layer: any) => {

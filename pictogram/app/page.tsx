@@ -17,6 +17,7 @@ import { HandMetal } from "lucide-react"
 import Lottie from "lottie-react"
 import { useState, useEffect } from "react"
 import { loadPictogramAnimation, lottieProps, type LottieAnimationData } from "@/lib/lottie-config"
+import { createApiPath } from "@/lib/path-utils"
 
 interface Pictogram {
   name: string
@@ -82,7 +83,7 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchPictograms() {
       try {
-        const response = await fetch('/api/pictograms')
+        const response = await fetch(createApiPath('pictograms'))
         if (!response.ok) throw new Error('Failed to fetch pictograms')
         
         const pictograms: Pictogram[] = await response.json()
@@ -107,7 +108,7 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchExtras() {
       try {
-        const response = await fetch('/api/extras')
+        const response = await fetch(createApiPath('extras'))
         if (!response.ok) throw new Error('Failed to fetch extras')
         
         const extras: Extra[] = await response.json()
