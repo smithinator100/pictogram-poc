@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { readdir } from 'fs/promises'
 import { join } from 'path'
 
+export const dynamic = 'force-static'
+
 export interface Pictogram {
   name: string
   filename: string
