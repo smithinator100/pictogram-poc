@@ -1,0 +1,13 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M34 30H30C23 30 17 24.2165 17 17V15C17 7.78347 22.7513 2 30 2H34C41.2487 2 47 7.85013 47 15.0667V16.9333C47 24.1499 41 30 34 30Z" fill="#5A2807"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M34 35H30C18.8625 35 10 43.9891 10 55V60C13.5218 63.4818 18.0197 64 23 64H41C45.9803 64 50.4782 63.4818 54 60V55C54 43.9891 45.1375 35 34 35Z" fill="#C18010"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M47 47L36 41L39 34H40C41.6381 34 43.5499 35.4056 44 37L47 47Z" fill="white"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M16 47L27 41L24 34H23C21.3619 34 19.4501 35.4056 19 37L16 47Z" fill="white"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M35 28H29C25.8941 28 24 30.8711 24 34V39C24 40.4308 24.7297 41.3606 26 42L31.5 45L37 42C38.2703 41.3606 39 40.4308 39 39V34C39 30.8711 38.1059 28 35 28Z" fill="#F1A031"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M33 40H30C26.8941 40 24 37.1473 24 34V27C24 23.8527 26.8941 21 30 21H33C36.1059 21 39 23.8527 39 27V34C39 37.1473 36.1059 40 33 40Z" fill="#C18010"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M32 35.9999C38.0747 35.9999 43 31.37 43 24.9999V16.6109C43 12.2892 40.1195 8.90664 36 8.99988H27C23.0519 9.08831 21 12.8599 21 16.9999V24.9999C21 31.37 25.9253 35.9999 32 35.9999Z" fill="#F1A031"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M21 17H31C35.6159 17 39 12.6948 39 8V6C39 2.87106 36.0764 0 33 0H13L19 6H13V8C13 12.6948 16.3841 17 21 17Z" fill="#5A2807"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M26 27C26.484 29.836 28.982 32 32 32C35.018 32 37.516 29.836 38 27H26Z" fill="white"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M31.5 54V54C30.672 54 30 53.329 30 52.5C30 51.671 30.672 51 31.5 51C32.328 51 33 51.671 33 52.5C33 53.329 32.328 54 31.5 54" fill="white"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M31.5 60V60C30.672 60 30 59.329 30 58.5C30 57.671 30.672 57 31.5 57C32.328 57 33 57.671 33 58.5C33 59.329 32.328 60 31.5 60" fill="white"/>
+</svg>

@@ -23,7 +23,7 @@ export const extraBgColor = '#E45656'
 
 // Lottie renderer settings
 export const lottieRendererSettings = {
-  preserveAspectRatio: 'xMidYMid slice',
+  preserveAspectRatio: 'none',
   imagePreserveAspectRatio: 'xMidYMid slice',
   progressiveLoad: false,
   hideOnTransparent: true,
@@ -33,7 +33,7 @@ export const lottieRendererSettings = {
 export const lottieProps = {
   loop: true,
   autoplay: true,
-  style: { width: '100%', height: 'auto' },
+  style: { width: '100%', height: '100%' },
   rendererSettings: lottieRendererSettings,
 }
 

@@ -10,8 +10,9 @@ import {
 } from "@/components/ui/sidebar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import { Slider } from "@/components/ui/slider"
 import { HandMetal } from "lucide-react"
 import Lottie from "lottie-react"
 import { useState, useEffect } from "react"
@@ -33,6 +34,12 @@ interface ColorOption {
   hex: string
 }
 
+interface BackgroundColorOption {
+  name: string
+  value: string
+  hex: string
+}
+
 const colorOptions: ColorOption[] = [
   { name: "Alert Yellow", value: "alert-yellow", hex: "#FFD000" },
   { name: "Yellow", value: "yellow", hex: "#FFCC33" },
@@ -45,6 +52,20 @@ const colorOptions: ColorOption[] = [
   { name: "None", value: "none", hex: "transparent" },
 ]
 
+const lightModeOptions: BackgroundColorOption[] = [
+  { name: "Primary", value: "primary-light", hex: "#F2F2F2" },
+  { name: "Secondary", value: "secondary-light", hex: "#F9F9F9" },
+  { name: "Tertiary", value: "tertiary-light", hex: "#FFFFFF" },
+  { name: "Canvas", value: "canvas-light", hex: "#FAFAFA" },
+]
+
+const darkModeOptions: BackgroundColorOption[] = [
+  { name: "Primary", value: "primary-dark", hex: "#282828" },
+  { name: "Secondary", value: "secondary-dark", hex: "#373737" },
+  { name: "Tertiary", value: "tertiary-dark", hex: "#474747" },
+  { name: "Canvas", value: "canvas-dark", hex: "#1C1C1C" },
+]
+
 export default function HomePage() {
   const [pictogramAnimation, setPictogramAnimation] = useState<LottieAnimationData | null>(null)
   const [availablePictograms, setAvailablePictograms] = useState<Pictogram[]>([])
@@ -54,6 +75,8 @@ export default function HomePage() {
   const [selectedExtra, setSelectedExtra] = useState('')
   const [isLoadingExtras, setIsLoadingExtras] = useState(true)
   const [selectedColor, setSelectedColor] = useState('blue') // Default to blue
+  const [selectedBackgroundColor, setSelectedBackgroundColor] = useState('tertiary-light') // Default to tertiary light
+  const [pictogramSize, setPictogramSize] = useState([100]) // Default to 100% size
 
   // Fetch available pictograms from API
   useEffect(() => {
@@ -104,7 +127,7 @@ export default function HomePage() {
     fetchExtras()
   }, [selectedExtra])
 
-  // Load animation when pictogram, extra, or color selection changes
+  // Load animation when pictogram, extra, color, or background color selection changes
   useEffect(() => {
     if (!selectedPictogram) return
 
@@ -119,7 +142,7 @@ export default function HomePage() {
       .catch(error => {
         console.error('Failed to load pictogram animation:', error)
       })
-  }, [selectedPictogram, selectedExtra, selectedColor])
+  }, [selectedPictogram, selectedExtra, selectedColor, selectedBackgroundColor])
 
   const handlePictogramSelect = (filename: string) => {
     setSelectedPictogram(filename)
@@ -131,6 +154,10 @@ export default function HomePage() {
 
   const handleColorSelect = (value: string) => {
     setSelectedColor(value)
+  }
+
+  const handleBackgroundColorSelect = (value: string) => {
+    setSelectedBackgroundColor(value)
   }
   return (
     <SidebarProvider 
@@ -188,7 +215,64 @@ export default function HomePage() {
               )}
             </div>
 
-            <Separator className="my-4" />
+            <div className="space-y-3">
+              <Select value={selectedBackgroundColor} onValueChange={handleBackgroundColorSelect}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select background color" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Light mode</SelectLabel>
+                    {lightModeOptions.map((bgColor) => (
+                      <SelectItem key={bgColor.value} value={bgColor.value}>
+                        <div className="flex items-center gap-3">
+                          <div 
+                            className="w-5 h-5 rounded border border-gray-300"
+                            style={{ backgroundColor: bgColor.hex }}
+                            title={bgColor.hex}
+                          />
+                          <span>{bgColor.name}</span>
+                          <span className="text-xs text-muted-foreground ml-auto">{bgColor.hex}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                  <SelectGroup>
+                    <SelectLabel>Dark mode</SelectLabel>
+                    {darkModeOptions.map((bgColor) => (
+                      <SelectItem key={bgColor.value} value={bgColor.value}>
+                        <div className="flex items-center gap-3">
+                          <div 
+                            className="w-5 h-5 rounded border border-gray-300"
+                            style={{ backgroundColor: bgColor.hex }}
+                            title={bgColor.hex}
+                          />
+                          <span>{bgColor.name}</span>
+                          <span className="text-xs text-muted-foreground ml-auto">{bgColor.hex}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">Pictogram size</Label>
+                <span className="text-xs text-muted-foreground">{pictogramSize[0]}%</span>
+              </div>
+              <Slider
+                value={pictogramSize}
+                onValueChange={setPictogramSize}
+                min={20}
+                max={200}
+                step={5}
+                className="w-full"
+              />
+            </div>
+
+            <Separator className="my-8" />
 
             <div className="space-y-3">
               <div className="flex items-center gap-2">
@@ -266,16 +350,29 @@ export default function HomePage() {
           <SidebarTrigger className="-ml-1" />
         </header>
         
-        <main className="flex flex-1 flex-col items-center justify-center px-6 pt-6 pb-32">
-          <Card className="w-full max-w-lg">
-            <CardContent className="p-6">
+        <main className="flex flex-1 flex-col items-center justify-center px- pt-6 pb-32">
+          <Card 
+            className="w-[640px] h-[480px] p-0 overflow-hidden"
+            style={{
+              transform: `scale(${pictogramSize[0] / 100})`,
+              transformOrigin: 'center'
+            }}
+          >
+            <CardContent 
+              className="p-0 w-full h-full"
+              style={{
+                backgroundColor: [...lightModeOptions, ...darkModeOptions].find(bg => bg.value === selectedBackgroundColor)?.hex || '#FFFFFF'
+              }}
+            >
               {pictogramAnimation ? (
-                <Lottie 
-                  animationData={pictogramAnimation}
-                  {...lottieProps}
-                />
+                <div className="w-full h-full">
+                  <Lottie 
+                    animationData={pictogramAnimation}
+                    {...lottieProps}
+                  />
+                </div>
               ) : (
-                <div className="flex items-center justify-center h-64">
+                <div className="flex items-center justify-center w-full h-full">
                   <p className="text-muted-foreground">Loading animation...</p>
                 </div>
               )}
