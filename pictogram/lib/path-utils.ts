@@ -1,10 +1,10 @@
 // Utility function to get the correct base path for different environments
 export function getBasePath(): string {
-  // In production on GitHub Pages, use the repository name as base path
+  // Only apply base path in browser environment on GitHub Pages
   if (typeof window !== 'undefined' && window.location.hostname === 'smithinator100.github.io') {
     return '/pictogram-poc'
   }
-  // In development or other environments, no base path needed
+  // For all other cases (development, server-side, other hosts), no base path
   return ''
 }
 
@@ -18,7 +18,9 @@ export function createPath(path: string): string {
 
 // Helper function for API calls
 export function createApiPath(endpoint: string): string {
-  return createPath(`/api/${endpoint.replace(/^\//, '')}`)
+  const path = createPath(`/api/${endpoint.replace(/^\//, '')}`)
+  // Ensure trailing slash for Next.js trailingSlash: true configuration
+  return path.endsWith('/') ? path : `${path}/`
 }
 
 // Helper function for static assets
