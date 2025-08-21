@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const isProd = process.env.NODE_ENV === 'production';
-const repoName = 'pictogram-app-2024';
+const repoName = 'pictogram-poc';
 
 const nextConfig: NextConfig = {
   output: 'export',
