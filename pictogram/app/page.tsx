@@ -171,6 +171,13 @@ export default function HomePage() {
     fetchLottieAnimations()
   }, [selectedLottieAnimation])
 
+  // Automatically disable flair when showExtra is disabled
+  useEffect(() => {
+    if (!showExtra) {
+      setShowFlair(false)
+    }
+  }, [showExtra])
+
   // Load animation when pictogram, extra, color, background color, showExtra, showFlair, or showSparkles selection changes
   useEffect(() => {
     if (!selectedPictogram) return
@@ -346,121 +353,126 @@ export default function HomePage() {
               </CardContent>
             </Card>
 
-            <Separator className="my-8" />
+            {showExtra && (
+              <>
+                <Separator className="my-8" />
 
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Label className="text-sm font-medium">Extra</Label>
-              </div>
-              {isLoadingExtras ? (
-                <div className="flex items-center justify-center p-4">
-                  <p className="text-sm text-muted-foreground">Loading extras...</p>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Label className="text-sm font-medium">Extra</Label>
+                  </div>
+                  {isLoadingExtras ? (
+                    <div className="flex items-center justify-center p-4">
+                      <p className="text-sm text-muted-foreground">Loading extras...</p>
+                    </div>
+                  ) : availableExtras.length > 0 ? (
+                    <Select value={selectedExtra} onValueChange={handleExtraSelect}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select an extra" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableExtras.map((extra) => (
+                          <SelectItem key={extra.filename} value={extra.filename}>
+                            <div className="flex items-center gap-3">
+                              <div className="w-5 h-5 bg-black rounded flex items-center justify-center">
+                                <img
+                                  src={createAssetPath(`/images/${extra.filename}`)}
+                                  alt={extra.name.replace(/extra[-\s]*/gi, '').trim()}
+                                  className="w-4 h-4 object-contain"
+                                />
+                              </div>
+                              <span>{extra.name.replace(/extra[-\s]*/gi, '').trim()}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <div className="flex items-center justify-center p-4">
+                      <p className="text-sm text-muted-foreground">No extras found</p>
+                    </div>
+                  )}
                 </div>
-              ) : availableExtras.length > 0 ? (
-                <Select value={selectedExtra} onValueChange={handleExtraSelect}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select an extra" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableExtras.map((extra) => (
-                      <SelectItem key={extra.filename} value={extra.filename}>
-                        <div className="flex items-center gap-3">
-                          <div className="w-5 h-5 bg-black rounded flex items-center justify-center">
-                            <img
-                              src={createAssetPath(`/images/${extra.filename}`)}
-                              alt={extra.name.replace(/extra[-\s]*/gi, '').trim()}
-                              className="w-4 h-4 object-contain"
+
+                <div className="space-y-3">
+                  <Select value={selectedColor} onValueChange={handleColorSelect}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a color" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {colorOptions.map((color) => (
+                        <SelectItem key={color.value} value={color.value}>
+                          <div className="flex items-center gap-3">
+                            <div 
+                              className="w-5 h-5 rounded border border-gray-300"
+                              style={{ 
+                                backgroundColor: color.hex === 'transparent' ? 'white' : color.hex,
+                                backgroundImage: color.hex === 'transparent' 
+                                  ? 'linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%)'
+                                  : undefined,
+                                backgroundSize: color.hex === 'transparent' ? '8px 8px' : undefined,
+                                backgroundPosition: color.hex === 'transparent' ? '0 0, 0 4px, 4px -4px, -4px 0px' : undefined
+                              }}
                             />
+                            <span>{color.name}</span>
+                            <span className="text-xs text-muted-foreground ml-auto">
+                              {color.hex === 'transparent' ? '0% opacity' : color.hex}
+                            </span>
                           </div>
-                          <span>{extra.name.replace(/extra[-\s]*/gi, '').trim()}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <div className="flex items-center justify-center p-4">
-                  <p className="text-sm text-muted-foreground">No extras found</p>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
-            </div>
 
-            <div className="space-y-3">
-              <Select value={selectedColor} onValueChange={handleColorSelect}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a color" />
-                </SelectTrigger>
-                <SelectContent>
-                  {colorOptions.map((color) => (
-                    <SelectItem key={color.value} value={color.value}>
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="w-5 h-5 rounded border border-gray-300"
-                          style={{ 
-                            backgroundColor: color.hex === 'transparent' ? 'white' : color.hex,
-                            backgroundImage: color.hex === 'transparent' 
-                              ? 'linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%)'
-                              : undefined,
-                            backgroundSize: color.hex === 'transparent' ? '8px 8px' : undefined,
-                            backgroundPosition: color.hex === 'transparent' ? '0 0, 0 4px, 4px -4px, -4px 0px' : undefined
-                          }}
-                        />
-                        <span>{color.name}</span>
-                        <span className="text-xs text-muted-foreground ml-auto">
-                          {color.hex === 'transparent' ? '0% opacity' : color.hex}
-                        </span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                <Card>
+                  <CardContent className="px-6 py-0">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="show-flair" className="text-sm font-medium">Flair</Label>
+                      <Switch
+                        id="show-flair"
+                        checked={showFlair}
+                        onCheckedChange={setShowFlair}
+                        disabled={!showExtra}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
 
-            <Card>
-              <CardContent className="px-6 py-0">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="show-flair" className="text-sm font-medium">Flair</Label>
-                  <Switch
-                    id="show-flair"
-                    checked={showFlair}
-                    onCheckedChange={setShowFlair}
-                  />
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Label className="text-sm font-medium">Animation</Label>
+                  </div>
+                  {isLoadingLottieAnimations ? (
+                    <div className="flex items-center justify-center p-4">
+                      <p className="text-sm text-muted-foreground">Loading animations...</p>
+                    </div>
+                  ) : availableLottieAnimations.length > 0 ? (
+                    <Select value={selectedLottieAnimation} onValueChange={handleLottieAnimationSelect}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select an animation" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableLottieAnimations.map((animation) => (
+                          <SelectItem key={animation.filename} value={animation.filename}>
+                            <div className="flex items-center gap-3">
+                              <div className="w-5 h-5 flex items-center justify-center">
+                                <Sparkles className="w-3 h-3 text-gray-600" />
+                              </div>
+                              <span>{animation.name}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <div className="flex items-center justify-center p-4">
+                      <p className="text-sm text-muted-foreground">No animations found</p>
+                    </div>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Label className="text-sm font-medium">Animation</Label>
-              </div>
-              {isLoadingLottieAnimations ? (
-                <div className="flex items-center justify-center p-4">
-                  <p className="text-sm text-muted-foreground">Loading animations...</p>
-                </div>
-              ) : availableLottieAnimations.length > 0 ? (
-                <Select value={selectedLottieAnimation} onValueChange={handleLottieAnimationSelect}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select an animation" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableLottieAnimations.map((animation) => (
-                      <SelectItem key={animation.filename} value={animation.filename}>
-                        <div className="flex items-center gap-3">
-                          <div className="w-5 h-5 flex items-center justify-center">
-                            <Sparkles className="w-3 h-3 text-gray-600" />
-                          </div>
-                          <span>{animation.name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <div className="flex items-center justify-center p-4">
-                  <p className="text-sm text-muted-foreground">No animations found</p>
-                </div>
-              )}
-            </div>
+              </>
+            )}
           </div>
         </SidebarContent>
       </Sidebar>
