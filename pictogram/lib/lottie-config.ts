@@ -73,7 +73,9 @@ export async function loadPictogramAnimation(
   extraBgColorHex?: string,
   extraIconColorHex?: string,
   showExtra: boolean = true,
-  lottieAnimationFilename: string = 'pictogram-5.json'
+  showFlair: boolean = true,
+  showSparkles: boolean = true,
+  lottieAnimationFilename: string = 'pictogram-6.json'
 ): Promise<LottieAnimationData> {
   try {
     const response = await fetch(createAssetPath(`/lottie/${lottieAnimationFilename}`))
@@ -121,9 +123,37 @@ export async function loadPictogramAnimation(
         }
       }) || [],
       layers: data.layers?.map((layer: any) => {
-        // Hide extra layers when showExtra is false
-        const extraLayerNames = ['extra-mask', 'extra', 'extra-mask-bg', 'extra-bg', 'cutout-mask', 'flair']
+        // Hide extra layers when showExtra is false (excluding flair which is handled separately)
+        const extraLayerNames = ['extra-mask', 'extra', 'extra-mask-bg', 'extra-bg', 'cutout-mask']
         if (!showExtra && extraLayerNames.includes(layer.nm)) {
+          return {
+            ...layer,
+            ks: {
+              ...layer.ks,
+              o: {
+                ...layer.ks?.o,
+                k: 0 // Set layer opacity to 0 to hide it
+              }
+            }
+          }
+        }
+        
+        // Hide flair layer when showFlair is false
+        if (!showFlair && layer.nm === 'flair') {
+          return {
+            ...layer,
+            ks: {
+              ...layer.ks,
+              o: {
+                ...layer.ks?.o,
+                k: 0 // Set layer opacity to 0 to hide it
+              }
+            }
+          }
+        }
+        
+        // Hide sparkles layer when showSparkles is false
+        if (!showSparkles && layer.nm === 'sparkles') {
           return {
             ...layer,
             ks: {

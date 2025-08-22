@@ -85,16 +85,22 @@ export default function HomePage() {
   const [selectedBackgroundColor, setSelectedBackgroundColor] = useState('tertiary-light') // Default to tertiary light
   const [pictogramSize, setPictogramSize] = useState([640]) // Default to 640px size
   const [showExtra, setShowExtra] = useState(true) // Default to showing extra layers
+  const [showFlair, setShowFlair] = useState(true) // Default to showing flair layer
+  const [showSparkles, setShowSparkles] = useState(true) // Default to showing sparkles layer
   const [availableLottieAnimations, setAvailableLottieAnimations] = useState<LottieAnimation[]>([])
   const [selectedLottieAnimation, setSelectedLottieAnimation] = useState('')
   const [isLoadingLottieAnimations, setIsLoadingLottieAnimations] = useState(true)
 
-  // Fetch available pictograms from API
+  // Fetch available pictograms from static data
   useEffect(() => {
     async function fetchPictograms() {
       try {
-        const response = await fetch(createApiPath('pictograms'))
-        if (!response.ok) throw new Error('Failed to fetch pictograms')
+        const dataUrl = createAssetPath('/data/pictograms.json')
+        const response = await fetch(dataUrl)
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch pictograms: ${response.status}`)
+        }
         
         const pictograms: Pictogram[] = await response.json()
         setAvailablePictograms(pictograms)
@@ -114,11 +120,12 @@ export default function HomePage() {
     fetchPictograms()
   }, [selectedPictogram])
 
-  // Fetch available extras from API
+  // Fetch available extras from static data
   useEffect(() => {
     async function fetchExtras() {
       try {
-        const response = await fetch(createApiPath('extras'))
+        const dataUrl = createAssetPath('/data/extras.json')
+        const response = await fetch(dataUrl)
         if (!response.ok) throw new Error('Failed to fetch extras')
         
         const extras: Extra[] = await response.json()
@@ -138,19 +145,20 @@ export default function HomePage() {
     fetchExtras()
   }, [selectedExtra])
 
-  // Fetch available lottie animations from API
+  // Fetch available lottie animations from static data
   useEffect(() => {
     async function fetchLottieAnimations() {
       try {
-        const response = await fetch(createApiPath('lottie-animations'))
+        const dataUrl = createAssetPath('/data/lottie-animations.json')
+        const response = await fetch(dataUrl)
         if (!response.ok) throw new Error('Failed to fetch lottie animations')
         
         const lottieAnimations: LottieAnimation[] = await response.json()
         setAvailableLottieAnimations(lottieAnimations)
         
-        // Set default selection to pictogram-5.json if available, otherwise first animation
+        // Set default selection to pictogram-6.json if available, otherwise first animation
         if (lottieAnimations.length > 0 && !selectedLottieAnimation) {
-          const defaultAnimation = lottieAnimations.find(anim => anim.filename === 'pictogram-5.json')
+          const defaultAnimation = lottieAnimations.find(anim => anim.filename === 'pictogram-6.json')
           setSelectedLottieAnimation(defaultAnimation ? defaultAnimation.filename : lottieAnimations[0].filename)
         }
       } catch (error) {
@@ -163,7 +171,7 @@ export default function HomePage() {
     fetchLottieAnimations()
   }, [selectedLottieAnimation])
 
-  // Load animation when pictogram, extra, color, background color, or showExtra selection changes
+  // Load animation when pictogram, extra, color, background color, showExtra, showFlair, or showSparkles selection changes
   useEffect(() => {
     if (!selectedPictogram) return
 
@@ -173,12 +181,12 @@ export default function HomePage() {
     // Set extra icon color to dark brown when yellow or alert yellow background is selected
     const extraIconColor = (selectedColor === 'yellow' || selectedColor === 'alert-yellow') ? '#92540C' : undefined
 
-    loadPictogramAnimation(selectedPictogram, selectedExtra || undefined, colorHex, extraIconColor, showExtra, selectedLottieAnimation)
+    loadPictogramAnimation(selectedPictogram, selectedExtra || undefined, colorHex, extraIconColor, showExtra, showFlair, showSparkles, selectedLottieAnimation)
       .then(setPictogramAnimation)
       .catch(error => {
         console.error('Failed to load pictogram animation:', error)
       })
-  }, [selectedPictogram, selectedExtra, selectedColor, selectedBackgroundColor, showExtra, selectedLottieAnimation])
+  }, [selectedPictogram, selectedExtra, selectedColor, selectedBackgroundColor, showExtra, showFlair, showSparkles, selectedLottieAnimation])
 
   const handlePictogramSelect = (filename: string) => {
     setSelectedPictogram(filename)
@@ -312,16 +320,31 @@ export default function HomePage() {
               />
             </div>
 
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="show-extra" className="text-sm font-medium">Show extra</Label>
-                <Switch
-                  id="show-extra"
-                  checked={showExtra}
-                  onCheckedChange={setShowExtra}
-                />
-              </div>
-            </div>
+            <Card>
+              <CardContent className="px-6 py-0">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="show-sparkles" className="text-sm font-medium">Show sparkles</Label>
+                  <Switch
+                    id="show-sparkles"
+                    checked={showSparkles}
+                    onCheckedChange={setShowSparkles}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="px-6 py-0">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="show-extra" className="text-sm font-medium">Show extra</Label>
+                  <Switch
+                    id="show-extra"
+                    checked={showExtra}
+                    onCheckedChange={setShowExtra}
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
             <Separator className="my-8" />
 
@@ -392,6 +415,19 @@ export default function HomePage() {
                 </SelectContent>
               </Select>
             </div>
+
+            <Card>
+              <CardContent className="px-6 py-0">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="show-flair" className="text-sm font-medium">Flair</Label>
+                  <Switch
+                    id="show-flair"
+                    checked={showFlair}
+                    onCheckedChange={setShowFlair}
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
             <div className="space-y-3">
               <div className="flex items-center gap-2">

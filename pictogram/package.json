@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "npm run generate-data && next build",
     "start": "next start",
-    "deploy": "npm run build && touch out/.nojekyll"
+    "deploy": "npm run build && touch out/.nojekyll",
+    "generate-data": "node scripts/generate-data.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
