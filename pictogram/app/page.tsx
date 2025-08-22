@@ -223,6 +223,12 @@ export default function HomePage() {
 
   const handleLottieAnimationSelect = (filename: string) => {
     setSelectedLottieAnimation(filename)
+    
+    // Automatically turn on flair when scale-in-burst is selected
+    if (filename === 'scale-in-burst.json') {
+      setShowExtra(true) // Enable extra first since flair depends on it
+      setShowFlair(true) // Enable flair
+    }
   }
   return (
     <SidebarProvider 
