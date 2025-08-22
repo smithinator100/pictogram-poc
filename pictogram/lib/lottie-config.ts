@@ -66,6 +66,91 @@ async function modifySvgColor(svgPath: string, newColor: string): Promise<string
   }
 }
 
+// Function to recursively update flair colors in compositions (for Scale In Burst animation)
+function updateFlairColorsInCompositions(
+  compositions: any[], 
+  normalizedColor: [number, number, number, number] | null
+): any[] {
+  if (!compositions) return compositions
+
+  return compositions.map(comp => {
+    if (!comp.layers) return comp
+
+    // Only update flair-related compositions, not sparkles
+    const isFlairComposition = comp.nm && (
+      comp.nm === 'Burst' || 
+      comp.nm === 'Pop Intense' || 
+      comp.nm === 'Flair 1' || 
+      comp.nm === 'Flair 2'
+    )
+
+    // Skip sparkles composition
+    if (comp.nm === 'sparkles') {
+      return comp
+    }
+
+    return {
+      ...comp,
+      layers: comp.layers.map((layer: any) => {
+        // Only update colors in flair-related compositions or if we're updating a specific composition
+        if (isFlairComposition || !comp.nm) {
+          // Update stroke colors (for burst ring in comp_2)
+          if (layer.shapes) {
+            const updatedShapes = layer.shapes.map((shape: any) => {
+              if (shape.it) {
+                return {
+                  ...shape,
+                  it: shape.it.map((item: any) => {
+                    // Update stroke color - only change red colors (E45656 equivalent)
+                    if (item.ty === 'st' && item.c && item.c.k && normalizedColor) {
+                      const [r, g, b] = item.c.k
+                      // Check if this is approximately the red color we want to replace
+                      const isRedish = r > 0.8 && g < 0.5 && b < 0.5
+                      if (isRedish) {
+                        return {
+                          ...item,
+                          c: {
+                            ...item.c,
+                            k: normalizedColor
+                          }
+                        }
+                      }
+                    }
+                    // Update fill color - only change red colors
+                    if (item.ty === 'fl' && item.c && item.c.k && normalizedColor) {
+                      const [r, g, b] = item.c.k
+                      // Check if this is approximately the red color we want to replace
+                      const isRedish = r > 0.8 && g < 0.5 && b < 0.5
+                      if (isRedish) {
+                        return {
+                          ...item,
+                          c: {
+                            ...item.c,
+                            k: normalizedColor
+                          }
+                        }
+                      }
+                    }
+                    return item
+                  })
+                }
+              }
+              return shape
+            })
+
+            return {
+              ...layer,
+              shapes: updatedShapes
+            }
+          }
+        }
+
+        return layer
+      })
+    }
+  })
+}
+
 // Function to load and transform pictogram animation with dynamic pictogram and extra selection
 export async function loadPictogramAnimation(
   pictogramFilename: string = 'pictogram-shield-green.svg',
@@ -75,10 +160,22 @@ export async function loadPictogramAnimation(
   showExtra: boolean = true,
   showFlair: boolean = true,
   showSparkles: boolean = true,
-  lottieAnimationFilename: string = 'pictogram-6.json'
+  lottieAnimationFilename: string = 'slide-in-bottom.json'
 ): Promise<LottieAnimationData> {
   try {
-    const response = await fetch(createAssetPath(`/lottie/${lottieAnimationFilename}`))
+    // Guard against empty filename
+    if (!lottieAnimationFilename || lottieAnimationFilename.trim() === '') {
+      console.warn('Empty lottie animation filename, using default')
+      lottieAnimationFilename = 'slide-in-bottom.json'
+    }
+    
+    const lottieUrl = createAssetPath(`/lottie/${lottieAnimationFilename}`)
+    const response = await fetch(lottieUrl)
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch lottie animation: ${response.status} ${response.statusText}`)
+    }
+    
     const data = await response.json()
     
     // Convert hex color to normalized RGB if color is provided
@@ -99,29 +196,44 @@ export async function loadPictogramAnimation(
       }
     }
 
-    // Update the animation data to use correct image paths and replace specific images
-    const updatedAnimation: LottieAnimationData = {
-      ...data,
-      assets: data.assets?.map((asset: LottieAsset) => {
-        if (asset.p === 'img_3.png') {
-          return {
-            ...asset,
-            u: createAssetPath('/images/'), // Update path for SVG
-            p: pictogramFilename // Replace with selected pictogram SVG file
-          }
+    // Check if this is the Scale In Burst animation and update compositions accordingly
+    const isScaleInBurst = lottieAnimationFilename === 'scale-in-burst.json'
+    let updatedAssets = data.assets?.map((asset: any) => {
+      if (asset.p === 'img_3.png') {
+        return {
+          ...asset,
+          u: createAssetPath('/images/'), // Update path for SVG
+          p: pictogramFilename // Replace with selected pictogram SVG file
         }
-        if (asset.p === 'img_1.png' && extraFilename) {
-          return {
-            ...asset,
-            u: processedExtraU, // Use processed path (empty for data URLs)
-            p: processedExtraPath || extraFilename // Use modified or original filename
-          }
+      }
+      if (asset.p === 'img_1.png' && extraFilename) {
+        return {
+          ...asset,
+          u: processedExtraU, // Use processed path (empty for data URLs)
+          p: processedExtraPath || extraFilename // Use modified or original filename
         }
+      }
+      
+      // For Scale In Burst, update composition assets that contain flair colors
+      if (isScaleInBurst && asset.layers && normalizedColor) {
+        const updatedCompositions = updateFlairColorsInCompositions([asset], normalizedColor)
         return {
           ...asset,
           u: createAssetPath('/lottie/images/'), // Update the path to the images
+          layers: updatedCompositions[0]?.layers || asset.layers
         }
-      }) || [],
+      }
+      
+      return {
+        ...asset,
+        u: asset.u ? createAssetPath('/lottie/images/') : asset.u, // Update the path to the images only if u exists
+      }
+    }) || []
+
+    // Update the animation data to use correct image paths and replace specific images
+    const updatedAnimation: LottieAnimationData = {
+      ...data,
+      assets: updatedAssets,
       layers: data.layers?.map((layer: any) => {
         // Hide extra layers when showExtra is false (excluding flair which is handled separately)
         const extraLayerNames = ['extra-mask', 'extra', 'extra-mask-bg', 'extra-bg', 'cutout-mask']

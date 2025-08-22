@@ -145,20 +145,29 @@ export default function HomePage() {
     fetchExtras()
   }, [selectedExtra])
 
-  // Fetch available lottie animations from static data
+  // Fetch available lottie animations from dynamic API
   useEffect(() => {
     async function fetchLottieAnimations() {
       try {
-        const dataUrl = createAssetPath('/data/lottie-animations.json')
-        const response = await fetch(dataUrl)
-        if (!response.ok) throw new Error('Failed to fetch lottie animations')
+        const apiUrl = createApiPath('lottie-animations')
+        console.log('Fetching lottie animations from:', apiUrl) // Debug log
         
-        const lottieAnimations: LottieAnimation[] = await response.json()
+        const response = await fetch(apiUrl)
+        console.log('Response status:', response.status, response.statusText) // Debug log
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch lottie animations: ${response.status} ${response.statusText}`)
+        }
+        
+        const responseText = await response.text()
+        console.log('Response text:', responseText.substring(0, 200)) // Debug log first 200 chars
+        
+        const lottieAnimations: LottieAnimation[] = JSON.parse(responseText)
         setAvailableLottieAnimations(lottieAnimations)
         
-        // Set default selection to pictogram-6.json if available, otherwise first animation
+        // Set default selection to slide-in-bottom.json if available, otherwise first animation
         if (lottieAnimations.length > 0 && !selectedLottieAnimation) {
-          const defaultAnimation = lottieAnimations.find(anim => anim.filename === 'pictogram-6.json')
+          const defaultAnimation = lottieAnimations.find(anim => anim.filename === 'slide-in-bottom.json')
           setSelectedLottieAnimation(defaultAnimation ? defaultAnimation.filename : lottieAnimations[0].filename)
         }
       } catch (error) {
@@ -169,7 +178,7 @@ export default function HomePage() {
     }
 
     fetchLottieAnimations()
-  }, [selectedLottieAnimation])
+  }, []) // Remove selectedLottieAnimation from dependencies to avoid circular updates
 
   // Automatically disable flair when showExtra is disabled
   useEffect(() => {
@@ -181,6 +190,7 @@ export default function HomePage() {
   // Load animation when pictogram, extra, color, background color, showExtra, showFlair, or showSparkles selection changes
   useEffect(() => {
     if (!selectedPictogram) return
+    if (!selectedLottieAnimation) return // Don't load until we have a valid animation selected
 
     const selectedColorOption = colorOptions.find(option => option.value === selectedColor)
     const colorHex = selectedColorOption?.hex === 'transparent' ? undefined : selectedColorOption?.hex

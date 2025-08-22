@@ -12,6 +12,10 @@
     "filename": "extra-arrow-up.svg"
   },
   {
+    "name": "Extra Arrow Right",
+    "filename": "extra-arrow-right.svg"
+  },
+  {
     "name": "Extra Block",
     "filename": "extra-block.svg"
   },
@@ -58,6 +62,10 @@
   {
     "name": "Extra Question",
     "filename": "extra-question.svg"
+  },
+  {
+    "name": "Extra Reload",
+    "filename": "extra-reload.svg"
   },
   {
     "name": "Extra Shield",
