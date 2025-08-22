@@ -13,7 +13,8 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Slider } from "@/components/ui/slider"
-import { HandMetal } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
+import { HandMetal, Sparkles } from "lucide-react"
 import Lottie from "lottie-react"
 import { useState, useEffect } from "react"
 import { loadPictogramAnimation, lottieProps, type LottieAnimationData } from "@/lib/lottie-config"
@@ -25,6 +26,11 @@ interface Pictogram {
 }
 
 interface Extra {
+  name: string
+  filename: string
+}
+
+interface LottieAnimation {
   name: string
   filename: string
 }
@@ -77,7 +83,11 @@ export default function HomePage() {
   const [isLoadingExtras, setIsLoadingExtras] = useState(true)
   const [selectedColor, setSelectedColor] = useState('blue') // Default to blue
   const [selectedBackgroundColor, setSelectedBackgroundColor] = useState('tertiary-light') // Default to tertiary light
-  const [pictogramSize, setPictogramSize] = useState([100]) // Default to 100% size
+  const [pictogramSize, setPictogramSize] = useState([640]) // Default to 640px size
+  const [showExtra, setShowExtra] = useState(true) // Default to showing extra layers
+  const [availableLottieAnimations, setAvailableLottieAnimations] = useState<LottieAnimation[]>([])
+  const [selectedLottieAnimation, setSelectedLottieAnimation] = useState('')
+  const [isLoadingLottieAnimations, setIsLoadingLottieAnimations] = useState(true)
 
   // Fetch available pictograms from API
   useEffect(() => {
@@ -128,7 +138,32 @@ export default function HomePage() {
     fetchExtras()
   }, [selectedExtra])
 
-  // Load animation when pictogram, extra, color, or background color selection changes
+  // Fetch available lottie animations from API
+  useEffect(() => {
+    async function fetchLottieAnimations() {
+      try {
+        const response = await fetch(createApiPath('lottie-animations'))
+        if (!response.ok) throw new Error('Failed to fetch lottie animations')
+        
+        const lottieAnimations: LottieAnimation[] = await response.json()
+        setAvailableLottieAnimations(lottieAnimations)
+        
+        // Set default selection to pictogram-5.json if available, otherwise first animation
+        if (lottieAnimations.length > 0 && !selectedLottieAnimation) {
+          const defaultAnimation = lottieAnimations.find(anim => anim.filename === 'pictogram-5.json')
+          setSelectedLottieAnimation(defaultAnimation ? defaultAnimation.filename : lottieAnimations[0].filename)
+        }
+      } catch (error) {
+        console.error('Error fetching lottie animations:', error)
+      } finally {
+        setIsLoadingLottieAnimations(false)
+      }
+    }
+
+    fetchLottieAnimations()
+  }, [selectedLottieAnimation])
+
+  // Load animation when pictogram, extra, color, background color, or showExtra selection changes
   useEffect(() => {
     if (!selectedPictogram) return
 
@@ -138,12 +173,12 @@ export default function HomePage() {
     // Set extra icon color to dark brown when yellow or alert yellow background is selected
     const extraIconColor = (selectedColor === 'yellow' || selectedColor === 'alert-yellow') ? '#92540C' : undefined
 
-    loadPictogramAnimation(selectedPictogram, selectedExtra || undefined, colorHex, extraIconColor)
+    loadPictogramAnimation(selectedPictogram, selectedExtra || undefined, colorHex, extraIconColor, showExtra, selectedLottieAnimation)
       .then(setPictogramAnimation)
       .catch(error => {
         console.error('Failed to load pictogram animation:', error)
       })
-  }, [selectedPictogram, selectedExtra, selectedColor, selectedBackgroundColor])
+  }, [selectedPictogram, selectedExtra, selectedColor, selectedBackgroundColor, showExtra, selectedLottieAnimation])
 
   const handlePictogramSelect = (filename: string) => {
     setSelectedPictogram(filename)
@@ -159,6 +194,10 @@ export default function HomePage() {
 
   const handleBackgroundColorSelect = (value: string) => {
     setSelectedBackgroundColor(value)
+  }
+
+  const handleLottieAnimationSelect = (filename: string) => {
+    setSelectedLottieAnimation(filename)
   }
   return (
     <SidebarProvider 
@@ -261,16 +300,27 @@ export default function HomePage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label className="text-sm font-medium">Pictogram size</Label>
-                <span className="text-xs text-muted-foreground">{pictogramSize[0]}%</span>
+                <span className="text-xs text-muted-foreground">{pictogramSize[0]}px</span>
               </div>
               <Slider
                 value={pictogramSize}
                 onValueChange={setPictogramSize}
-                min={20}
-                max={200}
-                step={5}
+                min={128}
+                max={1280}
+                step={32}
                 className="w-full"
               />
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="show-extra" className="text-sm font-medium">Show extra</Label>
+                <Switch
+                  id="show-extra"
+                  checked={showExtra}
+                  onCheckedChange={setShowExtra}
+                />
+              </div>
             </div>
 
             <Separator className="my-8" />
@@ -342,6 +392,39 @@ export default function HomePage() {
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Label className="text-sm font-medium">Animation</Label>
+              </div>
+              {isLoadingLottieAnimations ? (
+                <div className="flex items-center justify-center p-4">
+                  <p className="text-sm text-muted-foreground">Loading animations...</p>
+                </div>
+              ) : availableLottieAnimations.length > 0 ? (
+                <Select value={selectedLottieAnimation} onValueChange={handleLottieAnimationSelect}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select an animation" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableLottieAnimations.map((animation) => (
+                      <SelectItem key={animation.filename} value={animation.filename}>
+                        <div className="flex items-center gap-3">
+                          <div className="w-5 h-5 flex items-center justify-center">
+                            <Sparkles className="w-3 h-3 text-gray-600" />
+                          </div>
+                          <span>{animation.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="flex items-center justify-center p-4">
+                  <p className="text-sm text-muted-foreground">No animations found</p>
+                </div>
+              )}
+            </div>
           </div>
         </SidebarContent>
       </Sidebar>
@@ -355,7 +438,7 @@ export default function HomePage() {
           <Card 
             className="w-[640px] h-[480px] p-0 overflow-hidden"
             style={{
-              transform: `scale(${pictogramSize[0] / 100})`,
+              transform: `scale(${pictogramSize[0] / 640})`,
               transformOrigin: 'center'
             }}
           >

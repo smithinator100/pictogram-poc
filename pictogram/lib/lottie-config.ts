@@ -71,10 +71,12 @@ export async function loadPictogramAnimation(
   pictogramFilename: string = 'pictogram-shield-green.svg',
   extraFilename?: string,
   extraBgColorHex?: string,
-  extraIconColorHex?: string
+  extraIconColorHex?: string,
+  showExtra: boolean = true,
+  lottieAnimationFilename: string = 'pictogram-5.json'
 ): Promise<LottieAnimationData> {
   try {
-    const response = await fetch(createAssetPath('/lottie/pictogram-4.json'))
+    const response = await fetch(createAssetPath(`/lottie/${lottieAnimationFilename}`))
     const data = await response.json()
     
     // Convert hex color to normalized RGB if color is provided
@@ -119,6 +121,21 @@ export async function loadPictogramAnimation(
         }
       }) || [],
       layers: data.layers?.map((layer: any) => {
+        // Hide extra layers when showExtra is false
+        const extraLayerNames = ['extra-mask', 'extra', 'extra-mask-bg', 'extra-bg', 'cutout-mask', 'flair']
+        if (!showExtra && extraLayerNames.includes(layer.nm)) {
+          return {
+            ...layer,
+            ks: {
+              ...layer.ks,
+              o: {
+                ...layer.ks?.o,
+                k: 0 // Set layer opacity to 0 to hide it
+              }
+            }
+          }
+        }
+        
         // Find and update the extra-bg layer
         if (layer.nm === 'extra-bg' && layer.shapes) {
           return {
@@ -168,7 +185,7 @@ export async function loadPictogramAnimation(
     
     return updatedAnimation
   } catch (error) {
-    console.error('Error loading pictogram-2.json:', error)
+    console.error('Error loading pictogram.json:', error)
     throw error
   }
 }
