@@ -84,9 +84,9 @@ export default function HomePage() {
   const [selectedColor, setSelectedColor] = useState('blue') // Default to blue
   const [selectedBackgroundColor, setSelectedBackgroundColor] = useState('tertiary-light') // Default to tertiary light
   const [pictogramSize, setPictogramSize] = useState([640]) // Default to 640px size
-  const [showExtra, setShowExtra] = useState(true) // Default to showing extra layers
+  const [showExtra, setShowExtra] = useState(false) // Default to showing extra layers
   const [showFlair, setShowFlair] = useState(true) // Default to showing flair layer
-  const [showSparkles, setShowSparkles] = useState(true) // Default to showing sparkles layer
+  const [showSparkles, setShowSparkles] = useState(false) // Default to showing sparkles layer
   const [availableLottieAnimations, setAvailableLottieAnimations] = useState<LottieAnimation[]>([])
   const [selectedLottieAnimation, setSelectedLottieAnimation] = useState('')
   const [isLoadingLottieAnimations, setIsLoadingLottieAnimations] = useState(true)
